@@ -39,8 +39,6 @@ fn part1(str: &String) {
         }
         let newpos = Pos::new(x, y);
 
-
-//        let  x = visited.get(&newpos).cloned();
         match visited.get(&newpos).cloned() {
             None    => { visited.insert(newpos, 1);     }
             Some(v) => { visited.insert(newpos, v + 1); }

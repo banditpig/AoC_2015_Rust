@@ -6,7 +6,7 @@ pub fn part1_part2() {
     let s = read_file("data/day3.txt".to_string());
 
     part1(&s);
-    //    part2(&s);
+    part2(&s);
 }
 
 #[derive(Hash, Eq, PartialEq, Debug)]
@@ -21,8 +21,64 @@ impl Pos {
     }
 }
 
+fn part2(str: &String) {
+    let UP = 94;
+    let DOWN = 118;
+    let LEFT = 60;
+    let RIGHT = 62;
+    let mut visited = HashMap::new();
+    let start = Pos::new(0, 0);
+    visited.insert(start, 2);
+
+    let mut x = 0;
+    let mut y = 0;
+
+    let mut ix = 0;
+    let bytes = str.as_bytes();
+
+    while ix < bytes.len() {
+        match bytes[ix] {
+            UP    => y = y - 1,
+            DOWN  => y = y + 1,
+            LEFT  => x = x - 1,
+            RIGHT => x = x + 1,
+            _     => x = x + 0,
+        }
+        let newpos = Pos::new(x, y);
+
+        match visited.get(&newpos).cloned() {
+            None => { visited.insert(newpos, 1); }
+            Some(v) => { visited.insert(newpos, v + 1); }
+        }
+        ix += 2;
+    }
+
+    x = 0;
+    y = 0;
+    ix = 1;
+    while ix < bytes.len() {
+        match bytes[ix] {
+            UP    => y = y - 1,
+            DOWN  => y = y + 1,
+            LEFT  => x = x - 1,
+            RIGHT => x = x + 1,
+            _     => x = x + 0,
+        }
+        let newpos = Pos::new(x, y);
+
+        match visited.get(&newpos).cloned() {
+            None => { visited.insert(newpos, 1); }
+            Some(v) => { visited.insert(newpos, v + 1); }
+        }
+        ix += 2;
+    }
+
+
+    println!("xx {:?}", visited.len());
+}
+
 fn part1(str: &String) {
-    let  mut visited = HashMap::new();
+    let mut visited = HashMap::new();
     let start = Pos::new(0, 0);
     visited.insert(start, 1);
 
@@ -35,12 +91,12 @@ fn part1(str: &String) {
             'v' => y = y + 1,
             '<' => x = x - 1,
             '>' => x = x + 1,
-            _   => x = x + 0,
+            _ => x = x + 0,
         }
         let newpos = Pos::new(x, y);
 
         match visited.get(&newpos).cloned() {
-            None    => { visited.insert(newpos, 1);     }
+            None => { visited.insert(newpos, 1); }
             Some(v) => { visited.insert(newpos, v + 1); }
         }
     }

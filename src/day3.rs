@@ -22,59 +22,40 @@ impl Pos {
 }
 
 fn part2(str: &String) {
+
     let  mut visited = HashMap::new();
     let start = Pos::new(0, 0);
     visited.insert(start, 2);
 
-    let mut x = 0;
-    let mut y = 0;
-
-    let mut ix = 0;
     let bytes = str.as_bytes();
+    for sx in 0..2 { //range excludes endpoint!
 
-    while ix < bytes.len() {
-        match bytes[ix]{
-            94  => y = y - 1,
-            118 => y = y + 1,
-            60  => x = x - 1,
-            62  => x = x + 1,
-            _   => x = x + 0,
+        let mut x = 0;
+        let mut y = 0;
+        let mut ix = sx;
+
+        while ix < bytes.len() {
+            match bytes[ix] {
+                94  => y = y - 1,
+                118 => y = y + 1,
+                60  => x = x - 1,
+                62  => x = x + 1,
+                _   => x = x + 0,
+            }
+            let newpos = Pos::new(x, y);
+
+            match visited.get(&newpos).cloned() {
+                None => { visited.insert(newpos, 1); }
+                Some(v) => { visited.insert(newpos, v + 1); }
+            }
+            ix += 2;
         }
-        let newpos = Pos::new(x, y);
-
-        match visited.get(&newpos).cloned() {
-            None    => { visited.insert(newpos, 1);     }
-            Some(v) => { visited.insert(newpos, v + 1); }
-        }
-        ix += 2;
-
-    }
-    x = 0;
-    y = 0;
-    ix = 1;
-    while ix < bytes.len() {
-        match bytes[ix]{
-            94  => y = y - 1,
-            118 => y = y + 1,
-            60  => x = x - 1,
-            62  => x = x + 1,
-            _   => x = x + 0,
-        }
-        let newpos = Pos::new(x, y);
-
-        match visited.get(&newpos).cloned() {
-            None    => { visited.insert(newpos, 1);     }
-            Some(v) => { visited.insert(newpos, v + 1); }
-        }
-        ix += 2;
-
     }
 
-
-
-    println!("xx {:?}", visited.len());
+    println!("Day 3 part 2 {:?}", visited.len());
 }
 fn part1(str: &String) {
+
     let  mut visited = HashMap::new();
     let start = Pos::new(0, 0);
     visited.insert(start, 1);
@@ -98,6 +79,6 @@ fn part1(str: &String) {
         }
     }
 
-    println!("xx {:?}", visited.len());
+    println!("Day 3 part 1 {:?}", visited.len());
 }
 

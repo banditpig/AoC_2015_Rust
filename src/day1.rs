@@ -18,7 +18,9 @@ fn part2(s: &String){
 
 
 }
-
+/*
+Inc or dec, from zero, depending on if left or right parens.
+*/
 fn countparens(str: String) -> i32 {
     let mut net_value = 0;
     for c in str.chars(){
@@ -30,6 +32,9 @@ fn countparens(str: String) -> i32 {
     }
     net_value
 }
+/*
+Modify location based on parens keeping count of changes. When location is -1 return count.
+*/
 fn basement(str: String) -> i32 {
 
     let mut location  = 0;

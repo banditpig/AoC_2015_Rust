@@ -25,17 +25,23 @@ fn part1(s: &String){
     }
     println!("Day 2 part 1 {}", sum_area);
 }
+/*
+Puts 3 tuple of i32 in low to high order.
+*/
 fn sort(tpl: (i32, i32, i32) ) -> (i32, i32, i32){
     let (a, b, c) = tpl;
     let mut v = vec![a, b, c];
     v.sort();
     (v[0], v[1], v[2])
 }
+
+//Area calc based on puzzle spec.
 fn area2(tpl: (i32, i32, i32)) -> i32 {
     let (a, b, c)  = tpl;
     2 * a + 2 * b + (a * b * c)
 
 }
+//Area calc based on puzzle spec.
 fn area(tpl: (i32, i32, i32)) -> i32 {
 
     let (l, w, h) = tpl;
@@ -48,7 +54,9 @@ fn area(tpl: (i32, i32, i32)) -> i32 {
 
     area + extra
 }
-
+/*
+Parses line of input. eg "23x4x12" gives (23, 4, 12)
+*/
 fn split(triple: String) -> (i32, i32, i32) {
     let vec = triple.split("x").collect::<Vec<&str>>();
     (vec[0].parse::<i32>().unwrap(), vec[1].parse::<i32>().unwrap(), vec[2].parse::<i32>().unwrap())

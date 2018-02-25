@@ -40,7 +40,7 @@ fn part2(str: &String) {
                 118 => y = y + 1,
                 60  => x = x - 1,
                 62  => x = x + 1,
-                _   => x = x + 0,
+                _   => {},
             }
             let newpos = Pos::new(x, y);
 
@@ -69,7 +69,7 @@ fn part1(str: &String) {
             'v' => y = y + 1,
             '<' => x = x - 1,
             '>' => x = x + 1,
-            _   => x = x + 0,
+            _   => {},
         }
         let newpos = Pos::new(x, y);
 

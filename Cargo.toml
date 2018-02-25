@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["banditpig <mike_k_houghton@yahoo.co.uk>"]
 
 [dependencies]
+rust-crypto = "^0.2"

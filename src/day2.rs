@@ -25,17 +25,16 @@ fn part1(s: &String){
     }
     println!("Day 2 part 1 {}", sum_area);
 }
-/*
-Puts 3 tuple of i32 in low to high order.
-*/
-fn sort(tpl: (i32, i32, i32) ) -> (i32, i32, i32){
+
+
+pub fn sort<T: Eq + Ord + Clone>(tpl: (T, T, T) ) -> (T, T, T){
     let (a, b, c) = tpl;
-    let mut v = vec![a, b, c];
+    let mut v = [a, b, c];
     v.sort();
-    (v[0], v[1], v[2])
+
+    (v[0].clone(), v[1].clone(), v[2].clone())
 }
 
-//Area calc based on puzzle spec.
 fn area2(tpl: (i32, i32, i32)) -> i32 {
     let (a, b, c)  = tpl;
     2 * a + 2 * b + (a * b * c)

@@ -38,14 +38,12 @@ Modify location based on parens keeping count of changes. When location is -1 re
 fn basement(str: String) -> i32 {
 
     let mut location  = 0;
-    let mut count  = 0;
-    for c in str.chars(){
-        count = count + 1;
+    for (count, c) in str.chars().enumerate(){
         match c {
             '(' => location = location + 1,
             _   => location = location - 1,
         }
-        if location == -1 {return count}
+        if location == -1 {return  count as i32}
 
     }
     location

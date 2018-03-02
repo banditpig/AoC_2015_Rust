@@ -1,5 +1,5 @@
 use std::cmp;
-use file_utils::read_file;
+use utils::read_file;
 
 pub fn part1_part2() {
     let s = read_file("data/day2.txt".to_string());

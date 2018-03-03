@@ -163,13 +163,13 @@ pub fn part1_part2() {
 fn part2(all_ops: &AllOps) {
     let mut lights: [[i8; 1000]; 1000] = init2();
     let sum = run_ops_gen(&all_ops, &mut lights).result();
-    println!("{}", sum);
+    println!("Day 6 part 2 {}", sum);
 }
 
 fn part1(all_ops: &AllOps) {
     let mut lights: [[State; 1000]; 1000] = init();
     let sum: i64 = run_ops_gen(&all_ops, &mut lights).result();
-    println!("{:?}", sum);
+    println!("Day 6 part 1 {}", sum);
 }
 
 

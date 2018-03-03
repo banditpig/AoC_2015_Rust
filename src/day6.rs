@@ -1,7 +1,51 @@
 use utils::read_file;
-
+trait Switchable<T> {
+    fn switch(& mut self, op:&Op) -> GenLights<T>;
+}
+type GenLights<T> = [[T; 1000]; 1000];
 type Lights = [[State; 1000]; 1000];
+type DimmerLights = [[u32; 1000]; 1000];
 
+
+//impl Switchable<u32> for DimmerLights{
+//    fn switch(& mut self, op: &Op, ) ->  GenLights<u32>{
+//        *self
+//    }
+//}
+
+impl Switchable<State> for Lights{
+    fn switch(& mut self, op: &Op) -> Lights{
+        match op {
+            &Op::switchOn { ref start, ref end } => {
+                for r in start.row..end.row + 1 {
+                    for c in start.col..end.col + 1 {
+                        self[r][c] = State::On;
+                    }
+                }
+            }
+            &Op::switchOff { ref start, ref end } => {
+                for r in start.row..end.row + 1 {
+                    for c in start.col..end.col + 1 {
+                        self[r][c] = State::Off;
+                    }
+                }
+            }
+            &Op::switchToggle { ref start, ref end } => {
+                for r in start.row..end.row + 1 {
+                    for c in start.col..end.col + 1 {
+                        let mut old = self[r][c];
+                        match old {
+                            State::Off => self[r][c] = State::On,
+                            State::On =>  self[r][c] = State::Off
+                        }
+
+                    }
+                }
+            }
+        }
+        *self
+    }
+}
 #[derive(Debug)]
 struct Location {
     row: usize,
@@ -41,42 +85,13 @@ fn parse_line(line: &str) -> Op{
 
 }
 
-fn run_op<'a>(op: &'a Op, lights: &'a mut Lights) -> &'a mut Lights {
-    match op {
-        &Op::switchOn { ref start, ref end } => {
-            for r in start.row..end.row + 1 {
-                for c in start.col..end.col + 1 {
-                    lights[r][c] = State::On;
-                }
-            }
-        }
-        &Op::switchOff { ref start, ref end } => {
-            for r in start.row..end.row + 1 {
-                for c in start.col..end.col + 1 {
-                    lights[r][c] = State::Off;
-                }
-            }
-        }
-        &Op::switchToggle { ref start, ref end } => {
-            for r in start.row..end.row + 1 {
-                for c in start.col..end.col + 1 {
-                    let mut old = lights[r][c];
-                    match old {
-                        State::Off => lights[r][c] = State::On,
-                        State::On =>  lights[r][c] = State::Off
-                    }
 
-                }
-            }
-        }
+fn run_ops<'a>(ops: & AllOps, lights: &'a mut Lights) -> &'a mut Lights {
+
+    for op in ops{
+        lights.switch(&op);
     }
-    lights
-}
-
-fn run_ops<'a>(ops: &'a AllOps, lights: &'a mut Lights) -> &'a Lights {
-    let  ret = ops.iter()
-        .fold(lights, |lts, op| run_op(op, lts));
-    ret
+   lights
 }
 
 fn loc_from_string(s:&str) -> Location{

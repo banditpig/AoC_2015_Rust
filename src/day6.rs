@@ -3,15 +3,44 @@ trait Switchable<T> {
     fn switch(& mut self, op:&Op) -> GenLights<T>;
 }
 type GenLights<T> = [[T; 1000]; 1000];
-type Lights = [[State; 1000]; 1000];
-type DimmerLights = [[u32; 1000]; 1000];
+type Lights = GenLights<State>;//[[State; 1000]; 1000];
+type DimmerLights = GenLights<i8>;// [[i32; 1000]; 1000];
 
 
-//impl Switchable<u32> for DimmerLights{
-//    fn switch(& mut self, op: &Op, ) ->  GenLights<u32>{
-//        *self
-//    }
-//}
+impl Switchable<i8> for DimmerLights{
+    fn switch(& mut self, op: &Op) ->  DimmerLights{
+        match op {
+            &Op::switchOn { ref start, ref end } => {
+                for r in start.row..end.row + 1 {
+                    for c in start.col..end.col + 1 {
+                        let v = self[r][c];
+                        self[r][c] = v + 1;
+                    }
+                }
+            }
+            &Op::switchOff { ref start, ref end } => {
+                for r in start.row..end.row + 1 {
+                    for c in start.col..end.col + 1 {
+                        let mut v = self[r][c] - 1;
+                        if v < 0 {v = 0}
+                        self[r][c] = v;
+                    }
+                }
+            }
+            &Op::switchToggle { ref start, ref end } => {
+                for r in start.row..end.row + 1 {
+                    for c in start.col..end.col + 1 {
+                        let v = self[r][c];
+
+                        self[r][c] = v + 2;
+
+                    }
+                }
+            }
+        }
+        *self
+    }
+}
 
 impl Switchable<State> for Lights{
     fn switch(& mut self, op: &Op) -> Lights{
@@ -94,6 +123,15 @@ fn run_ops<'a>(ops: & AllOps, lights: &'a mut Lights) -> &'a mut Lights {
    lights
 }
 
+fn run_ops2<'a>(ops: & AllOps, lights: &'a mut DimmerLights) -> &'a mut DimmerLights {
+
+    for op in ops{
+        lights.switch(&op);
+    }
+    lights
+}
+
+
 fn loc_from_string(s:&str) -> Location{
     let vec = s.split(",").collect::<Vec<&str>>();
     let r = vec[0].parse::<usize>().unwrap();
@@ -103,6 +141,10 @@ fn loc_from_string(s:&str) -> Location{
 }
 fn init() -> Lights {
     [[State::Off; 1000]; 1000]
+}
+fn init2() -> DimmerLights {
+
+    [[0; 1000]; 1000]
 }
 
 fn count_states(lights:  &Lights) -> (usize, usize){
@@ -119,12 +161,27 @@ fn count_states(lights:  &Lights) -> (usize, usize){
 
 pub fn part1_part2(){
     let s = read_file("data/day6.txt".to_string());
-    part1(&s);
+//    part1(&s);
     part2(&s);
 }
 
-fn part2(s: &String) {
 
+fn part2(s: &String) {
+    let mut all_ops: Vec<Op> = vec![];
+    let mut lights:[[i8;1000];1000] = init2();
+
+    for line in s.lines(){
+        all_ops.push(parse_line(&line)) ;
+    }
+
+    run_ops2(&all_ops,&mut lights);
+    let mut sum:i64 = 0;
+    for r in 0..1000 {
+        for c in 0..1000{
+           sum = sum + (lights[r][c] as i64);
+        }
+    }
+    println!("{}", sum);
 }
 fn part1(s: &String) {
     let mut all_ops: Vec<Op> = vec![];

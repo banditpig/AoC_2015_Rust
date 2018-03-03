@@ -1,16 +1,20 @@
 use utils::read_file;
+use std::thread;
+
 trait Switchable<T> {
-    fn switch(& mut self, op:&Op) -> GenLights<T>;
+    fn switch(&mut self, op: &Op) -> GenLights<T>;
+    fn result(&mut self) -> i64;
 }
+
 type GenLights<T> = [[T; 1000]; 1000];
-type Lights = GenLights<State>;//[[State; 1000]; 1000];
-type DimmerLights = GenLights<i8>;// [[i32; 1000]; 1000];
+type Lights = GenLights<State>;
+type DimmerLights = GenLights<i8>;
 
 
-impl Switchable<i8> for DimmerLights{
-    fn switch(& mut self, op: &Op) ->  DimmerLights{
+impl Switchable<i8> for DimmerLights {
+    fn switch(&mut self, op: &Op) -> DimmerLights {
         match op {
-            &Op::switchOn { ref start, ref end } => {
+            &Op::SwitchOn { ref start, ref end } => {
                 for r in start.row..end.row + 1 {
                     for c in start.col..end.col + 1 {
                         let v = self[r][c];
@@ -18,180 +22,154 @@ impl Switchable<i8> for DimmerLights{
                     }
                 }
             }
-            &Op::switchOff { ref start, ref end } => {
+            &Op::SwitchOff { ref start, ref end } => {
                 for r in start.row..end.row + 1 {
                     for c in start.col..end.col + 1 {
                         let mut v = self[r][c] - 1;
-                        if v < 0 {v = 0}
+                        if v < 0 { v = 0 }
                         self[r][c] = v;
                     }
                 }
             }
-            &Op::switchToggle { ref start, ref end } => {
+            &Op::SwitchToggle { ref start, ref end } => {
                 for r in start.row..end.row + 1 {
                     for c in start.col..end.col + 1 {
                         let v = self[r][c];
 
                         self[r][c] = v + 2;
-
                     }
                 }
             }
         }
         *self
     }
+    fn result(&mut self) -> i64 {
+        let mut sum: i64 = 0;
+        self.iter().for_each(|s| s.iter().for_each(|v| sum = sum + (*v as i64)));
+        sum
+    }
 }
 
-impl Switchable<State> for Lights{
-    fn switch(& mut self, op: &Op) -> Lights{
+impl Switchable<State> for Lights {
+    fn switch(&mut self, op: &Op) -> Lights {
         match op {
-            &Op::switchOn { ref start, ref end } => {
+            &Op::SwitchOn { ref start, ref end } => {
                 for r in start.row..end.row + 1 {
                     for c in start.col..end.col + 1 {
                         self[r][c] = State::On;
                     }
                 }
             }
-            &Op::switchOff { ref start, ref end } => {
+            &Op::SwitchOff { ref start, ref end } => {
                 for r in start.row..end.row + 1 {
                     for c in start.col..end.col + 1 {
                         self[r][c] = State::Off;
                     }
                 }
             }
-            &Op::switchToggle { ref start, ref end } => {
+            &Op::SwitchToggle { ref start, ref end } => {
                 for r in start.row..end.row + 1 {
                     for c in start.col..end.col + 1 {
                         let mut old = self[r][c];
                         match old {
                             State::Off => self[r][c] = State::On,
-                            State::On =>  self[r][c] = State::Off
+                            State::On => self[r][c] = State::Off
                         }
-
                     }
                 }
             }
         }
         *self
     }
+    fn result(&mut self) -> i64 {
+        let mut on_cnt: i64 = 0;
+        self.iter().for_each(|s| s.iter().for_each(|st| if *st == State::On { on_cnt += 1; }));
+
+        on_cnt
+    }
 }
+
 #[derive(Debug)]
 struct Location {
     row: usize,
     col: usize
 }
+
 #[derive(Debug)]
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum State {
     On,
     Off
 }
+
 #[derive(Debug)]
 enum Op {
-    switchOn { start: Location, end: Location },
-    switchOff { start: Location, end: Location },
-    switchToggle { start: Location, end: Location }
+    SwitchOn { start: Location, end: Location },
+    SwitchOff { start: Location, end: Location },
+    SwitchToggle { start: Location, end: Location }
 }
 type AllOps = Vec<Op>;
 
-fn parse_line(line: &str) -> Op{
-
-
-    if line.starts_with("turn on "){
-        let vec: Vec<&str> =  line[8..].split(" through ").collect::<Vec<&str>>();;
-        let op = Op::switchOn {start: loc_from_string(vec[0]), end: loc_from_string(vec[1])};
+fn parse_line(line: &str) -> Op {
+    if line.starts_with("turn on ") {
+        let vec: Vec<&str> = line[8..].split(" through ").collect::<Vec<&str>>();
+        let op = Op::SwitchOn { start: loc_from_string(vec[0]), end: loc_from_string(vec[1]) };
         return op;
     }
-    if line.starts_with("turn off "){
-        let vec: Vec<&str> =  line[9..].split(" through ").collect::<Vec<&str>>();;
-        let op = Op::switchOff {start: loc_from_string(vec[0]), end: loc_from_string(vec[1])};
+    if line.starts_with("turn off ") {
+        let vec: Vec<&str> = line[9..].split(" through ").collect::<Vec<&str>>();
+        let op = Op::SwitchOff { start: loc_from_string(vec[0]), end: loc_from_string(vec[1]) };
         return op;
     }
 
-    let vec: Vec<&str> =  line[7..].split(" through ").collect::<Vec<&str>>();;
-    let op = Op::switchToggle {start: loc_from_string(vec[0]), end: loc_from_string(vec[1])};
+    let vec: Vec<&str> = line[7..].split(" through ").collect::<Vec<&str>>();
+
+    let op = Op::SwitchToggle { start: loc_from_string(vec[0]), end: loc_from_string(vec[1]) };
     return op;
-
 }
 
-
-fn run_ops<'a>(ops: & AllOps, lights: &'a mut Lights) -> &'a mut Lights {
-
-    for op in ops{
-        lights.switch(&op);
-    }
-   lights
-}
-
-fn run_ops2<'a>(ops: & AllOps, lights: &'a mut DimmerLights) -> &'a mut DimmerLights {
-
-    for op in ops{
+fn run_ops_gen<'a, T>(ops: &AllOps, lights: &'a mut Switchable<T>) -> &'a mut Switchable<T> {
+    for op in ops {
         lights.switch(&op);
     }
     lights
 }
 
 
-fn loc_from_string(s:&str) -> Location{
+fn loc_from_string(s: &str) -> Location {
     let vec = s.split(",").collect::<Vec<&str>>();
     let r = vec[0].parse::<usize>().unwrap();
     let c = vec[1].parse::<usize>().unwrap();
-    let loc = Location{row: r, col:c};
+    let loc = Location { row: r, col: c };
     loc
 }
+
 fn init() -> Lights {
     [[State::Off; 1000]; 1000]
 }
-fn init2() -> DimmerLights {
 
+fn init2() -> DimmerLights {
     [[0; 1000]; 1000]
 }
 
-fn count_states(lights:  &Lights) -> (usize, usize){
-    let mut on_cnt = 0 ;
-    for r in 0..1000 {
-        for c in 0..1000{
-            if lights[r][c] == State::On {
-                on_cnt += 1;
-            }
-        }
-    }
-    (on_cnt, 1000000 - on_cnt)
-}
-
-pub fn part1_part2(){
+pub fn part1_part2() {
     let s = read_file("data/day6.txt".to_string());
-//    part1(&s);
-    part2(&s);
+    let mut all_ops: Vec<Op> = vec![];
+    s.lines().for_each(|line| all_ops.push(parse_line(&line)));
+    part1(&all_ops);
+    part2(&all_ops);
 }
 
-
-fn part2(s: &String) {
-    let mut all_ops: Vec<Op> = vec![];
-    let mut lights:[[i8;1000];1000] = init2();
-
-    for line in s.lines(){
-        all_ops.push(parse_line(&line)) ;
-    }
-
-    run_ops2(&all_ops,&mut lights);
-    let mut sum:i64 = 0;
-    for r in 0..1000 {
-        for c in 0..1000{
-           sum = sum + (lights[r][c] as i64);
-        }
-    }
+fn part2(all_ops: &AllOps) {
+    let mut lights: [[i8; 1000]; 1000] = init2();
+    let sum = run_ops_gen(&all_ops, &mut lights).result();
     println!("{}", sum);
 }
-fn part1(s: &String) {
-    let mut all_ops: Vec<Op> = vec![];
-    let mut lights:[[State;1000];1000] = init();
 
-    for line in s.lines(){
-        all_ops.push(parse_line(&line)) ;
-    }
-
-    println!("{:?}", count_states(run_ops(&all_ops,&mut lights)));
+fn part1(all_ops: &AllOps) {
+    let mut lights: [[State; 1000]; 1000] = init();
+    let sum: i64 = run_ops_gen(&all_ops, &mut lights).result();
+    println!("{:?}", sum);
 }
 
 

@@ -1,6 +1,4 @@
-//use std::fs::File;
-//use std::io::prelude::*;
-//use std::cmp;
+
 use std::thread;
 
 extern crate crypto;

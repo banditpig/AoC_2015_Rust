@@ -1,8 +1,7 @@
 use utils::read_file;
-use std::thread;
 
 trait Switchable<T> {
-    fn switch(&mut self, op: &Op) -> GenLights<T>;
+    fn switch(&mut self, op: &Op);
     fn result(&mut self) -> i64;
 }
 
@@ -12,7 +11,7 @@ type DimmerLights = GenLights<i8>;
 
 
 impl Switchable<i8> for DimmerLights {
-    fn switch(&mut self, op: &Op) -> DimmerLights {
+    fn switch(&mut self, op: &Op) {
         match op {
             &Op::SwitchOn { ref start, ref end } => {
                 for r in start.row..end.row + 1 {
@@ -35,13 +34,12 @@ impl Switchable<i8> for DimmerLights {
                 for r in start.row..end.row + 1 {
                     for c in start.col..end.col + 1 {
                         let v = self[r][c];
-
                         self[r][c] = v + 2;
                     }
                 }
             }
         }
-        *self
+
     }
     fn result(&mut self) -> i64 {
         let mut sum: i64 = 0;
@@ -51,7 +49,7 @@ impl Switchable<i8> for DimmerLights {
 }
 
 impl Switchable<State> for Lights {
-    fn switch(&mut self, op: &Op) -> Lights {
+    fn switch(&mut self, op: &Op) {
         match op {
             &Op::SwitchOn { ref start, ref end } => {
                 for r in start.row..end.row + 1 {
@@ -79,7 +77,7 @@ impl Switchable<State> for Lights {
                 }
             }
         }
-        *self
+
     }
     fn result(&mut self) -> i64 {
         let mut on_cnt: i64 = 0;
